@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer CRUD</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .form-row input {
+            flex: 1;
+            min-width: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-row input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            min-width: 40px;
+        }
+
+        .pagination span {
+            color: #666;
+        }
+
+        .search-section {
+            margin-bottom: 20px;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-row input {
+            flex: 1;
+            min-width: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .search-row input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .settings-panel {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .settings-panel label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .settings-panel input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Customer CRUD</h1>
+
+
+        <div class="card">
+            <h2>Add/Edit Customer</h2>
+            <form id="customerForm">
+                <input type="hidden" id="customerId">
+                <div class="form-row">
+                    <input type="text" id="name" placeholder="Name" required>
+                    <input type="text" id="surname" placeholder="Surname" required>
+                    <input type="text" id="phone" placeholder="Phone" required>
+                </div>
+                <div class="form-row">
+                    <button type="submit" class="btn-primary" id="submitBtn">Create</button>
+                    <button type="button" class="btn-secondary hidden" id="cancelBtn">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Search</h2>
+            <div class="search-row">
+                <input type="text" id="searchName" placeholder="Search by name...">
+                <input type="text" id="searchPhone" placeholder="Search by phone...">
+                <button type="button" class="btn-primary" id="searchBtn">Search</button>
+                <button type="button" class="btn-secondary" id="clearSearchBtn">Clear</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Customers</h2>
+            <div id="message"></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Surname</th>
+                        <th>Phone</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="customerTable">
+                    <tr>
+                        <td colspan="5" class="loading">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination">
+                <button class="btn-secondary" id="prevBtn">Previous</button>
+                <span id="pageInfo">Page 1</span>
+                <button class="btn-secondary" id="nextBtn">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+
+        let currentPage = 1;
+        let pageSize = 10;
+        let searchFilters = { name: '', phone: '' };
+        let isEditing = false;
+
+        document.addEventListener('DOMContentLoaded', function() {
+           
+
+            loadCustomers();
+
+            document.getElementById('customerForm').addEventListener('submit', handleSubmit);
+            document.getElementById('searchBtn').addEventListener('click', handleSearch);
+            document.getElementById('clearSearchBtn').addEventListener('click', clearSearch);
+            document.getElementById('prevBtn').addEventListener('click', () => changePage(-1));
+            document.getElementById('nextBtn').addEventListener('click', () => changePage(1));
+            document.getElementById('cancelBtn').addEventListener('click', cancelEdit);
+           
+        });
+
+        async function apiRequest(method, body) {
+			
+            const url = 'https://script.google.com/macros/s/AKfycbzBA4yuruqg4n4Qbh7EDtk7lDlUGQoZlt_TpxKFMFSiFldXsYEn9goouj_dEfAHA3odsA/exec';
+           
+            const requestBody = {
+                path: 'customers',
+                method: method,
+                body: body
+            };
+			
+            try {
+
+				const response = await fetch(url, {
+							redirect: "follow",
+							method: "POST",
+							body: JSON.stringify(requestBody),
+							headers: {
+							  "Content-Type": "text/plain;charset=utf-8",
+							},
+						  });
+               
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+				const responseJson = await response.json();
+				
+				if(!responseJson.success){
+					throw new Error('Response status failed');
+				}
+
+                return responseJson.response;
+            } catch (error) {
+                const errorMsg = error.message || '';
+                if (errorMsg.includes('CORS') || errorMsg.includes('blocked') || errorMsg.includes('Failed to fetch')) {
+                    showMessage('CORS Error: Your Google Apps Script must include CORS headers. Add .addHeader("Access-Control-Allow-Origin", "*") to your doPost response.', 'error');
+                } else {
+                    showMessage('Error: ' + error.message, 'error');
+                }
+                return null;
+            }
+        }
+
+        async function loadCustomers() {
+            const where = [];
+
+            if (searchFilters.name) {
+                where.push(`name like ${searchFilters.name}`);
+            }
+            if (searchFilters.phone) {
+                where.push(`phone is ${searchFilters.phone}`);
+            }
+
+            const body = {
+                where: where,
+                pagination: {
+                    pageSize: pageSize,
+                    pageNum: currentPage
+                }
+            };
+
+            const result = await apiRequest('page', body);
+
+            if (result) {
+                renderCustomers(result);
+            }
+        }
+
+        function renderCustomers(data) {
+			
+            const tbody = document.getElementById('customerTable');
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="loading">No customers found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(customer => `
+                <tr>
+                    <td>${customer.id}</td>
+                    <td>${escapeHtml(customer.name)}</td>
+                    <td>${escapeHtml(customer.surname)}</td>
+                    <td>${escapeHtml(customer.phone)}</td>
+                    <td class="actions">
+                        <button class="btn-primary btn-sm" onclick="editCustomer('${customer.id}')">Edit</button>
+                        <button class="btn-danger btn-sm" onclick="deleteCustomer('${customer.id}')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('pageInfo').textContent = `Page ${currentPage}`;
+            document.getElementById('prevBtn').disabled = currentPage <= 1;
+            document.getElementById('nextBtn').disabled = !data.hasNext;
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('customerId').value;
+            const name = document.getElementById('name').value.trim();
+            const surname = document.getElementById('surname').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+
+            if (!name || !surname || !phone) {
+                showMessage('Please fill all fields', 'error');
+                return;
+            }
+
+            let result;
+            if (isEditing) {
+                const customer = await apiRequest('findById', id);
+                if (customer) {
+                    result = await apiRequest('create', {
+                        id: id,
+                        name: name,
+                        surname: surname,
+                        phone: phone
+                    });
+                }
+            } else {
+                result = await apiRequest('create', {
+                    name: name,
+                    surname: surname,
+                    phone: phone
+                });
+            }
+
+            if (result) {
+                showMessage(isEditing ? 'Customer updated successfully' : 'Customer created successfully', 'success');
+                resetForm();
+                loadCustomers();
+            }
+        }
+
+        async function editCustomer(id) {
+            const result = await apiRequest('findById', id);
+
+            if (result) {
+                document.getElementById('customerId').value = id;
+                document.getElementById('name').value = result.name || '';
+                document.getElementById('surname').value = result.surname || '';
+                document.getElementById('phone').value = result.phone || '';
+                document.getElementById('submitBtn').textContent = 'Update';
+                document.getElementById('cancelBtn').classList.remove('hidden');
+                isEditing = true;
+            }
+        }
+
+        async function deleteCustomer(id) {
+            if (!confirm('Are you sure you want to delete this customer?')) {
+                return;
+            }
+
+            const result = await apiRequest('deleteById', id);
+
+            if (result) {
+                showMessage('Customer deleted successfully', 'success');
+                loadCustomers();
+            }
+        }
+
+        function handleSearch() {
+            searchFilters = {
+                name: document.getElementById('searchName').value.trim(),
+                phone: document.getElementById('searchPhone').value.trim()
+            };
+            currentPage = 1;
+            loadCustomers();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchName').value = '';
+            document.getElementById('searchPhone').value = '';
+            searchFilters = { name: '', phone: '' };
+            currentPage = 1;
+            loadCustomers();
+        }
+
+        function changePage(delta) {
+            currentPage += delta;
+            if (currentPage < 1) currentPage = 1;
+            loadCustomers();
+        }
+
+        function resetForm() {
+            document.getElementById('customerForm').reset();
+            document.getElementById('customerId').value = '';
+            document.getElementById('submitBtn').textContent = 'Create';
+            document.getElementById('cancelBtn').classList.add('hidden');
+            isEditing = false;
+        }
+
+        function cancelEdit() {
+            resetForm();
+        }
+
+        function showMessage(message, type) {
+            const container = document.getElementById('message');
+            container.innerHTML = `<div class="${type}">${escapeHtml(message)}</div>`;
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
